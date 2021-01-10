@@ -31,10 +31,9 @@ RSpec.describe "Users", type: :system do
       end
       context '登録済みのメールアドレスを使用' do
         it 'ユーザの新規作成が失敗する' do
-          create(:user, email: 'example@example.com')
           visit sign_up_path
           expect {
-            fill_in 'Email', with: 'example@example.com'
+            fill_in 'Email', with: user.email
             fill_in 'Password', with: 'foobar'
             fill_in 'Password confirmation', with: 'foobar'
             click_button 'SignUp'
