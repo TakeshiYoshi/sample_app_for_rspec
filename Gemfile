@@ -17,6 +17,9 @@ group :development, :test do
   gem 'rspec-rails', '~> 4.0.1'
   gem 'factory_bot', '~> 4.8', '>= 4.8.2'
   gem 'factory_bot_rails'
+  gem 'capybara'
+  gem 'selenium-webdriver'
+  gem 'webdrivers'
 end
 
 group :development do
