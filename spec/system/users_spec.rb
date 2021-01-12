@@ -2,47 +2,49 @@ require 'rails_helper'
 
 RSpec.describe "Users", type: :system do
   let(:user) { create(:user) }
+
   describe 'ログイン前' do
     describe 'ユーザ新規登録' do
       context 'フォームの入力値が正常' do
         it 'ユーザの新規作成が成功する' do
           visit sign_up_path
-          expect {
-            fill_in 'Email', with: 'example1@example.com'
-            fill_in 'Password', with: 'foobar'
-            fill_in 'Password confirmation', with: 'foobar'
-            click_button 'SignUp'
-          }.to change(User, :count).by(1)
+          fill_in 'Email', with: 'example1@example.com'
+          fill_in 'Password', with: 'foobar'
+          fill_in 'Password confirmation', with: 'foobar'
+          click_button 'SignUp'
           expect(page).to have_content 'User was successfully created.'
+          expect(current_path).to eq login_path
         end
       end
+
       context 'メールアドレスが未入力' do
         it 'ユーザの新規作成が失敗する' do
           visit sign_up_path
-          expect {
-            fill_in 'Email', with: ''
-            fill_in 'Password', with: 'foobar'
-            fill_in 'Password confirmation', with: 'foobar'
-            click_button 'SignUp'
-          }.not_to change{ User }
+          fill_in 'Email', with: ''
+          fill_in 'Password', with: 'foobar'
+          fill_in 'Password confirmation', with: 'foobar'
+          click_button 'SignUp'
           expect(page).to have_content '1 error prohibited this user from being saved'
           expect(page).to have_content "Email can't be blank"
+          expect(current_path).to eq users_path
         end
       end
+
       context '登録済みのメールアドレスを使用' do
         it 'ユーザの新規作成が失敗する' do
           visit sign_up_path
-          expect {
-            fill_in 'Email', with: user.email
-            fill_in 'Password', with: 'foobar'
-            fill_in 'Password confirmation', with: 'foobar'
-            click_button 'SignUp'
-          }.not_to change{ User }
+          fill_in 'Email', with: user.email
+          fill_in 'Password', with: 'foobar'
+          fill_in 'Password confirmation', with: 'foobar'
+          click_button 'SignUp'
           expect(page).to have_content '1 error prohibited this user from being saved'
           expect(page).to have_content 'Email has already been taken'
+          expect(current_path).to eq users_path
+          expect(page).to have_field 'Email', with: user.email
         end
       end
     end
+
     describe 'マイページ' do
       context 'ログインしていない状態' do
         it 'マイページへのアクセスに失敗する' do
@@ -56,6 +58,7 @@ RSpec.describe "Users", type: :system do
 
   describe 'ログイン後' do
     before { login_as user }
+
     describe 'ユーザ編集' do
       let(:another_user) { create(:user) }
       context 'フォームの入力値が正常' do
@@ -67,8 +70,10 @@ RSpec.describe "Users", type: :system do
           click_button 'Update'
           expect(user.reload.email).to eq 'change@example.com'
           expect(page).to have_content 'User was successfully updated.'
+          expect(current_path).to eq user_path(user)
         end
       end
+
       context 'メールアドレスが未入力' do
         it 'ユーザの編集が失敗する' do
           visit edit_user_path(user)
@@ -78,8 +83,10 @@ RSpec.describe "Users", type: :system do
           click_button 'Update'
           expect(page).to have_content '1 error prohibited this user from being saved'
           expect(page).to have_content "Email can't be blank"
+          expect(current_path).to eq user_path(user)
         end
       end
+
       context '登録済みのメールアドレスを使用' do
         it 'ユーザの編集が失敗する' do
           visit edit_user_path(user)
@@ -89,6 +96,7 @@ RSpec.describe "Users", type: :system do
           click_button 'Update'
           expect(page).to have_content '1 error prohibited this user from being saved'
           expect(page).to have_content "Email has already been taken"
+          expect(current_path).to eq user_path(user)
         end
       end
       context '他ユーザの編集ページにアクセス' do
@@ -108,6 +116,9 @@ RSpec.describe "Users", type: :system do
           expect(page).to have_content 'You have 1 task.'
           expect(page).to have_content 'Test task'
           expect(page).to have_content 'todo'
+          expect(page).to have_content 'Show'
+          expect(page).to have_content 'Edit'
+          expect(page).to have_content 'Destroy'
         end
       end
     end
